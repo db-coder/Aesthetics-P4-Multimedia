@@ -1,0 +1,230 @@
+import processing.pdf.*;
+import ddf.minim.*;
+//import processing.sound.*;
+
+Minim minim;
+AudioPlayer twinkle_song;
+AudioPlayer bobCat_song;
+AudioPlayer chopin_song;
+AudioPlayer A_flat;
+AudioPlayer A;
+AudioPlayer B_flat;
+AudioPlayer B;
+AudioPlayer C;
+AudioPlayer D;
+AudioPlayer E;
+AudioPlayer E_flat;
+AudioPlayer F;
+AudioPlayer G;
+AudioPlayer G_flat;
+
+int lastTimeCheck;
+int TIMER = 1100;
+int count = 0;
+int counter = 0;
+int song = 0;
+ArrayList<Pulse> pulses = new ArrayList();
+String s = "Song Playing: ";
+String chord_text = "";
+boolean start = true, demo = false, chords = false;
+
+int button1X, button1Y;      // Position of square button
+int button2X, button2Y;      // Position of square button
+int rectSize = 90;     // Diameter of rect
+color button1Color, button2Color;
+color button1Highlight, button2Highlight;
+boolean button1Over = false;
+boolean button2Over = false;
+
+void setup() 
+{
+  size(800,800);
+  background(#676E81);
+  
+  button1Color = color(0);
+  button1Highlight = color(51);
+  button2Color = color(255);
+  button2Highlight = color(204);
+  button1X = width/2-200;
+  button1Y = height/2;
+  button2X = width/2+100;
+  button2Y = height/2;
+  
+  lastTimeCheck = millis();
+  minim = new Minim(this);
+  twinkle_song = minim.loadFile("data/Tunes/twinkle_twinkle.mp3");
+  bobCat_song = minim.loadFile("data/Tunes/bob_cat.mp3");
+  chopin_song = minim.loadFile("data/Tunes/chopin.mp3");
+  A_flat = minim.loadFile("data/Notes/PianoNote09.mp3");
+  A = minim.loadFile("data/Notes/PianoNote10.mp3");
+  B_flat = minim.loadFile("data/Notes/PianoNote11.mp3");
+  B = minim.loadFile("data/Notes/PianoNote12.mp3");
+  C = minim.loadFile("data/Notes/PianoNote01.mp3");
+  D = minim.loadFile("data/Notes/PianoNote03.mp3");
+  E_flat = minim.loadFile("data/Notes/PianoNote04.mp3");
+  E = minim.loadFile("data/Notes/PianoNote05.mp3");
+  F = minim.loadFile("data/Notes/PianoNote06.mp3");
+  G = minim.loadFile("data/Notes/PianoNote08.mp3");
+  G_flat = minim.loadFile("data/Notes/PianoNote07.mp3");
+}      
+
+void draw() 
+{
+  background(#676E81);
+  fill(0); 
+  scribeHeader("Rossignac's 2017 Computational Aesthetics course at Georgia Tech -- Project 4: Multimedia", 0);
+  scribeHeaderRight("Team: Dibyendu Mondal & Amy Zhuang");
+  if(start)
+  {
+    update();
+    if(button1Over)
+    {
+      fill(button1Highlight);
+    }
+    else
+    {
+      fill(button1Color);
+    }
+    stroke(255);
+    rect(button1X, button1Y, rectSize*1.5, rectSize);
+    
+    if(button2Over)
+    {
+      fill(button2Highlight);
+    }
+    else
+    {
+      fill(button2Color);
+    }
+    stroke(255);
+    rect(button2X, button2Y, rectSize*1.5, rectSize);
+  }
+  else if(demo)
+  {
+    if(song == 1)
+    {
+      playTwinkle();
+      s = "Song Playing: Twinkle twinkle little star";
+    }
+    else if(song == 2)
+    {
+      playBob();
+      s = "Song Playing: Bob Cat";
+    }
+    else if(song == 3)
+    {
+      playChopin();
+      s = "Song Playing: Chopin";
+    }
+    scribeHeader("Rossignac's 2017 Computational Aesthetics course at Georgia Tech -- Project 4: Multimedia", 0);
+    scribeHeaderRight("Team: Dibyendu Mondal & Amy Zhuang");
+    scribeFooter(s,1);
+    scribeHeader("Press \n1 to play Twinkle twinkle little star\n2 to play Bob cat\n3 to play Chopin prelude in E minor",1);
+  }
+  else if(chords)
+  {
+    for (Pulse p: pulses) 
+      p.pulsing_chords(); 
+    scribeHeader("Rossignac's 2017 Computational Aesthetics course at Georgia Tech -- Project 4: Multimedia", 0);
+    scribeHeaderRight("Team: Dibyendu Mondal & Amy Zhuang");
+    scribeHeader("Chord Playing: "+chord_text,1);
+  }
+}
+
+void update() 
+{
+  if(overButton(button1X, button1Y, rectSize*1.5, rectSize))
+  {
+    button1Over = true;
+    button2Over = false;
+  } 
+  else if(overButton(button2X, button2Y, rectSize*1.5, rectSize)) 
+  {
+    button2Over = true;
+    button1Over = false;
+  } 
+  else 
+  {
+    button1Over = false;
+    button2Over = false;
+  }
+}
+
+boolean overButton(int x, int y, float width, int height)  
+{
+  if (mouseX >= x && mouseX <= x+width && mouseY >= y && mouseY <= y+height) 
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+void playTwinkle()
+{
+  if(twinkle_song.isPlaying() && millis() - lastTimeCheck >= TIMER)
+  {
+    lastTimeCheck = millis();
+    count++;
+    if(count == 7 || count == 8 || count == 24 || count == 25)
+    {
+      TIMER = 500;
+    }
+    else
+    {
+     TIMER = 1000;
+    }
+   if(count == 3 || count == 11 || count == 15 || count == 20) 
+     pulses.add(new Pulse(5));
+   else if(count == 5 || count == 23)
+     pulses.add(new Pulse(4));
+   else if(count == 7 || count == 8 || count == 13 || count == 17 || count == 24 || count == 25)
+     pulses.add(new Pulse(1));
+   else if (count == 1 || count == 2 || count == 4 || count == 6 || count == 9 || count == 10 || count == 12 || count == 14 || count == 16 || count == 18 || count == 19 || count == 21 || count == 23 || count == 26)
+     pulses.add(new Pulse(1));  
+  }
+  for (Pulse p: pulses) 
+    p.pulsing_chords();
+}
+
+void playBob()
+{
+  if(bobCat_song.isPlaying() && millis() - lastTimeCheck >= TIMER)
+  {
+    lastTimeCheck = millis();
+    count++;
+    if(count == 2 || count == 9 || count == 10 || count == 17 || count == 18 || count == 33 || count == 34 || count == 41 || count == 42 || count == 49 || count == 50) 
+      pulses.add(new Pulse(2));
+    else if (count == 3 || count == 4 || count == 5 || count == 6 || count == 7 || count == 8 || count == 11 || count == 12 ||  count == 13 || count == 14 || count == 15 || count == 16 || count == 19 || count == 20 || count == 35 || count == 36 || count == 37 || count == 38 || count == 39 || count == 40 || count == 43 || count == 44 ||  count == 45 || count == 46 || count == 47 || count == 48 || count == 51 || count == 52) 
+      pulses.add(new Pulse(1));
+    else if(count == 21 || count == 22 || count == 23 || count == 24 || count == 53 || count == 54 || count == 55 || count == 56) 
+      pulses.add(new Pulse(4));
+    else
+      pulses.add(new Pulse(3));
+  }
+  for (Pulse p: pulses) 
+    p.pulsing_chords();
+}
+
+void playChopin()
+{
+  if(chopin_song.isPlaying() && millis() - lastTimeCheck >= TIMER)
+  {
+    lastTimeCheck = millis();
+    count++;
+    if(count == 2 || count == 9 || count == 10 || count == 33 || count == 34 || count == 41 || count == 42 || count == 65 || count == 66) 
+      pulses.add(new Pulse(2));
+    else
+      pulses.add(new Pulse(2));      
+  }
+  for (Pulse p: pulses) 
+    p.pulsing_chords();
+}
+
+void circlePulse() 
+{
+  pulses.get(counter).pulsing();
+  counter++;
+}
